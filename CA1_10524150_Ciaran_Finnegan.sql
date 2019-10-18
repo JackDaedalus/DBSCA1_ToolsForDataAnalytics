@@ -68,11 +68,8 @@ FROM	/*	This subquery retrieves the data from the database tables using a join a
 			and nested sub queries. The Averge Price calaculation uses a correlated inner sub-query
 			referencing the car details in the outter query */
 		(SELECT S1.first_name, S1.last_name, S1.car, S1.gender, r.region, S1.selling_date, S1.price, 
-				(SELECT AVG(price) FROM sellers S2 
-				 WHERE S1.car = S2.car
-				 AND S2.selling_date > @Selling_Date_After_2009
-				 AND S2.region_id IN (Select region_id from @RegionIDs)) Avg_Price,
-				 @Verified 'Comment'   /* The Comment field uses the literal value declared earlier in the script */
+					AVG(price) OVER (PARTITION BY s1.car)  Avg_Price,
+					@Verified 'Comment'   /* The Comment field uses the literal value declared earlier in the script */
 		FROM sellers S1, cars c, regions r
 		WHERE S1.car = c.car
 		/* The region join is included because I wanted to capture the test description of the region in the SELECT output */
@@ -82,7 +79,7 @@ FROM	/*	This subquery retrieves the data from the database tables using a join a
 		AND S1.selling_date > @Selling_Date_After_2009
 		AND S1.region_id IN (Select region_id from @RegionIDs)) A
 ORDER BY car, price
-
+/* avg(price) OVER (PARTITION BY s.car) Avg_Price  */
 
 
 
